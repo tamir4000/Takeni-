@@ -43,6 +43,7 @@ model Technician {
   updatedAt   DateTime @updatedAt
 
   jobs        Job[]    @relation("TechnicianJobs")
+  reviews     Review[]
 }
 
 model Job {
@@ -68,4 +69,18 @@ model Job {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   completedAt     DateTime?
+
+  review          Review?
+}
+
+model Review {
+  id           String     @id @default(cuid())
+  jobId        String     @unique
+  job          Job        @relation(fields: [jobId], references: [id])
+  customerId   String
+  technicianId String
+  technician   Technician @relation(fields: [technicianId], references: [id])
+  rating       Int
+  comment      String?
+  createdAt    DateTime   @default(now())
 }

@@ -58,6 +58,7 @@ export default function TechnicianPage() {
   const [pendingJobs, setPendingJobs] = useState<Job[]>([])
   const [toggling, setToggling] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [totalEarnings, setTotalEarnings] = useState(0)
 
   const fetchAll = useCallback(async () => {
     try {
@@ -91,6 +92,19 @@ export default function TechnicianPage() {
         const jobsData = await jobsRes.json()
         const allJobs: Job[] = jobsData.jobs || []
         setPendingJobs(allJobs.filter((j) => j.status === 'searching'))
+        const completedJobs = allJobs.filter((j) => j.status === 'completed')
+        const earnings = completedJobs.reduce((sum, j) => {
+          if (!j.estimatedPrice) return sum
+          const match = j.estimatedPrice.replace(/[^\d–-]/g, '').split(/[–-]/)
+          if (match.length === 2) {
+            const lo = parseInt(match[0]) || 0
+            const hi = parseInt(match[1]) || 0
+            return sum + Math.round((lo + hi) / 2)
+          }
+          const single = parseInt(j.estimatedPrice.replace(/\D/g, '')) || 0
+          return sum + single
+        }, 0)
+        setTotalEarnings(earnings)
       }
     } catch {
       router.push('/auth?role=technician')
@@ -239,6 +253,33 @@ export default function TechnicianPage() {
                 <p className="text-text-muted text-xs">{stat.label}</p>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Earnings summary */}
+        {techStatus && (
+          <div
+            className="p-4 rounded-2xl mb-6 flex items-center justify-between"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,212,184,0.12) 0%, rgba(0,136,204,0.08) 100%)',
+              border: '1px solid rgba(0,212,184,0.25)',
+            }}
+          >
+            <div>
+              <p className="text-text-muted text-xs mb-1">הרוויחת בסה״כ</p>
+              <p className="text-accent font-black text-2xl">₪{totalEarnings.toLocaleString()}</p>
+            </div>
+            <button
+              onClick={() => router.push('/technician/history')}
+              className="px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95"
+              style={{
+                background: 'rgba(0,212,184,0.15)',
+                border: '1px solid rgba(0,212,184,0.3)',
+                color: '#00d4b8',
+              }}
+            >
+              היסטוריה
+            </button>
           </div>
         )}
 

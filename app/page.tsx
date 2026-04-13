@@ -1,7 +1,27 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Header from '@/components/Header'
 
+interface Stats {
+  technicianCount: number
+  avgRating: number
+  completedJobs: number
+}
+
 export default function LandingPage() {
+  const [stats, setStats] = useState<Stats | null>(null)
+
+  useEffect(() => {
+    fetch('/api/stats')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) setStats(data)
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <main
       className="flex flex-col min-h-screen"
@@ -125,18 +145,18 @@ export default function LandingPage() {
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 14px' }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: '#00d4b8' }}>500+</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: '#00d4b8' }}>{stats ? `${stats.technicianCount}+` : '...'}</span>
             <span style={{ fontSize: 10, color: '#4d6b85' }}>טכנאים</span>
           </div>
           <div style={{ width: 1, height: 28, background: 'rgba(0,212,184,0.12)' }} />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 14px' }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: '#00d4b8' }}>4.9★</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: '#00d4b8' }}>{stats ? `${stats.avgRating}★` : '...'}</span>
             <span style={{ fontSize: 10, color: '#4d6b85' }}>ממוצע</span>
           </div>
           <div style={{ width: 1, height: 28, background: 'rgba(0,212,184,0.12)' }} />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 14px' }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: '#00d4b8' }}>20 דק׳</span>
-            <span style={{ fontSize: 10, color: '#4d6b85' }}>הגעה</span>
+            <span style={{ fontSize: 14, fontWeight: 800, color: '#00d4b8' }}>{stats ? stats.completedJobs : '...'}</span>
+            <span style={{ fontSize: 10, color: '#4d6b85' }}>עבודות</span>
           </div>
         </div>
 

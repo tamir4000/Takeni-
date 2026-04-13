@@ -201,7 +201,13 @@ function TrackingContent() {
               </div>
 
               <div className="flex-1">
-                <h3 className="text-white font-bold text-base">{tech.user.name}</h3>
+                <button
+                  onClick={() => router.push(`/technician/profile/${tech.id}`)}
+                  className="text-white font-bold text-base hover:text-accent transition-colors"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  {tech.user.name}
+                </button>
                 <p className="text-text-muted text-xs mb-1">
                   {SERVICE_LABELS[job.serviceType]} • {tech.totalJobs} עבודות
                 </p>
@@ -233,15 +239,90 @@ function TrackingContent() {
           </div>
         )}
 
-        {/* Back to home */}
+        {/* Completed overlay */}
         {job.status === 'completed' && (
-          <button
-            onClick={() => router.push('/customer')}
-            className="w-full py-4 rounded-2xl font-bold text-lg text-bg-dark transition-all active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #00d4b8 0%, #009e8a 100%)' }}
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(8,15,30,0.97)',
+              zIndex: 200,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 24px',
+              maxWidth: 430,
+              margin: '0 auto',
+            }}
           >
-            בקשה חדשה
-          </button>
+            {/* Animated checkmark */}
+            <div
+              style={{
+                width: 90,
+                height: 90,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #00d4b8 0%, #009e8a 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 24,
+                boxShadow: '0 0 40px rgba(0,212,184,0.5)',
+                animation: 'pulse 2s infinite',
+              }}
+            >
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            </div>
+            <h2 style={{ color: '#fff', fontSize: 26, fontWeight: 900, marginBottom: 8, textAlign: 'center' }}>
+              העבודה הושלמה! 🎉
+            </h2>
+            {tech && (
+              <p style={{ color: '#8ba3be', fontSize: 15, marginBottom: 32, textAlign: 'center' }}>
+                {tech.user.name} סיים את העבודה בהצלחה
+              </p>
+            )}
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {tech && (
+                <button
+                  onClick={() => router.push(`/customer/rate?jobId=${jobId}`)}
+                  style={{
+                    width: '100%',
+                    padding: '16px 24px',
+                    borderRadius: 14,
+                    fontWeight: 700,
+                    fontSize: 16,
+                    color: '#080f1e',
+                    background: 'linear-gradient(135deg, #00d4b8 0%, #009e8a 100%)',
+                    boxShadow: '0 6px 24px rgba(0,212,184,0.35)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  דרג את {tech.user.name}
+                </button>
+              )}
+              <button
+                onClick={() => router.push('/')}
+                style={{
+                  width: '100%',
+                  padding: '14px 24px',
+                  borderRadius: 14,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  color: '#00d4b8',
+                  background: 'rgba(0,212,184,0.06)',
+                  border: '1.5px solid rgba(0,212,184,0.3)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                חזרה לראשי
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </main>

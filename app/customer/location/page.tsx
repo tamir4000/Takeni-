@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function LocationPage() {
+function LocationContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -282,5 +282,17 @@ export default function LocationPage() {
         </button>
       </div>
     </main>
+  )
+}
+
+export default function LocationPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#080f1e' }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #00d4b8', borderTopColor: 'transparent' }} />
+      </div>
+    }>
+      <LocationContent />
+    </Suspense>
   )
 }

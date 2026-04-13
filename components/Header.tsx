@@ -194,13 +194,44 @@ export default function Header({ showTabs = true }: HeaderProps) {
           }}
         >
           <p style={{ fontSize: 12, color: '#4d6b85', marginBottom: 8, fontWeight: 600 }}>התראות</p>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00d4b8', marginTop: 4, flexShrink: 0 }} />
             <div>
               <p style={{ fontSize: 13, color: '#fff', fontWeight: 600, marginBottom: 2 }}>טכנאי בדרך אליך</p>
               <p style={{ fontSize: 11, color: '#8ba3be' }}>משה לוי מגיע תוך ~18 דקות</p>
             </div>
           </div>
+          {userRole && (
+            <div style={{ borderTop: '1px solid rgba(0,212,184,0.12)', paddingTop: 10 }}>
+              <p style={{ fontSize: 12, color: '#4d6b85', marginBottom: 8, fontWeight: 600 }}>ניווט מהיר</p>
+              <button
+                onClick={() => {
+                  setShowNotif(false)
+                  router.push(userRole === 'technician' ? '/technician/history' : '/customer/history')
+                }}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  background: 'rgba(0,212,184,0.08)',
+                  border: '1px solid rgba(0,212,184,0.2)',
+                  color: '#00d4b8',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textAlign: 'right',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                היסטוריה
+              </button>
+            </div>
+          )}
         </div>
       )}
     </header>

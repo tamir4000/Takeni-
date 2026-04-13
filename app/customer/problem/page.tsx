@@ -112,6 +112,10 @@ function ProblemForm() {
     setLoading(true)
 
     try {
+      const saved = localStorage.getItem('takeni_address')
+      const addr = saved ? JSON.parse(saved) : null
+      const customerAddress = addr ? `${addr.street}, ${addr.city}` : 'ישראל'
+
       const res = await fetch('/api/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +123,7 @@ function ProblemForm() {
           serviceType: service,
           description: description.trim(),
           urgency,
-          customerAddress: 'דיזנגוף 99, תל אביב',
+          customerAddress,
           customerLat: 32.0823,
           customerLng: 34.7741,
           estimatedPrice: priceRange,

@@ -13,6 +13,15 @@ export async function GET(
         user: {
           select: { id: true, name: true, phone: true },
         },
+        reviews: {
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          include: {
+            job: {
+              select: { serviceType: true, createdAt: true },
+            },
+          },
+        },
       },
     })
 
