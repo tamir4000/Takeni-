@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/Header'
 
@@ -28,7 +28,7 @@ const SERVICE_TIMES: Record<string, string> = {
   other: '15–25 דק\'',
 }
 
-export default function ProblemPage() {
+function ProblemForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const service = searchParams.get('service') || 'other'
@@ -219,5 +219,18 @@ export default function ProblemPage() {
         </button>
       </div>
     </main>
+  )
+}
+
+
+export default function ProblemPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a1628' }}>
+        <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#00d4b8', borderTopColor: 'transparent' }} />
+      </div>
+    }>
+      <ProblemForm />
+    </Suspense>
   )
 }
