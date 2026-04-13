@@ -32,11 +32,13 @@ model Technician {
   specialty   String   // JSON encoded array: ["electricity", "plumbing", ...]
   rating      Float    @default(5.0)
   totalJobs   Int      @default(0)
-  isAvailable Boolean  @default(false)
-  currentLat  Float?
-  currentLng  Float?
-  address     String?
-  bio         String?
+  isAvailable     Boolean  @default(false)
+  yearsExperience Int      @default(0)
+  status          String   @default("pending") // "pending" | "approved" | "rejected"
+  currentLat      Float?
+  currentLng      Float?
+  address         String?
+  bio             String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

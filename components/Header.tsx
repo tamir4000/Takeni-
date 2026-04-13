@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface HeaderProps {
   showTabs?: boolean
@@ -9,6 +10,16 @@ interface HeaderProps {
 export default function Header({ showTabs = true }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const [userRole, setUserRole] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.user?.role) setUserRole(data.user.role)
+      })
+      .catch(() => {})
+  }, [])
 
   const isCustomer = pathname?.startsWith('/customer') || pathname === '/' || pathname === '/auth'
   const isTechnician = pathname?.startsWith('/technician')
@@ -18,7 +29,11 @@ export default function Header({ showTabs = true }: HeaderProps) {
   }
 
   const handleTechnicianClick = () => {
-    router.push('/auth?role=technician')
+    if (userRole === 'technician') {
+      router.push('/technician')
+    } else {
+      router.push('/technician/landing')
+    }
   }
 
   return (

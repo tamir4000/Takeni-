@@ -8,7 +8,7 @@ const COOKIE_NAME = 'takeni-auth'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, phone, password, role = 'customer' } = body
+    const { name, phone, password, role = 'customer', specialty, yearsExperience } = body
 
     if (!name || !phone || !password) {
       return NextResponse.json(
@@ -51,8 +51,10 @@ export async function POST(request: NextRequest) {
       await prisma.technician.create({
         data: {
           userId: user.id,
-          specialty: JSON.stringify([]),
+          specialty: specialty ? JSON.stringify([specialty]) : JSON.stringify([]),
+          yearsExperience: typeof yearsExperience === 'number' ? yearsExperience : 0,
           isAvailable: false,
+          status: 'pending',
         },
       })
     }
