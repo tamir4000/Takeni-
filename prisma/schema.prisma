@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   @unique
+  email     String?  @unique
+  password  String
+  role      String   @default("customer") // "customer" | "technician"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Customer relations
+  jobs      Job[]    @relation("CustomerJobs")
+
+  // Technician relations
+  technician Technician?
+}
+
+model Technician {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  specialty   String   // JSON encoded array: ["electricity", "plumbing", ...]
+  rating      Float    @default(5.0)
+  totalJobs   Int      @default(0)
+  isAvailable Boolean  @default(false)
+  currentLat  Float?
+  currentLng  Float?
+  address     String?
+  bio         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobs        Job[]    @relation("TechnicianJobs")
+}
+
+model Job {
+  id           String   @id @default(cuid())
+  customerId   String
+  customer     User     @relation("CustomerJobs", fields: [customerId], references: [id])
+  technicianId String?
+  technician   Technician? @relation("TechnicianJobs", fields: [technicianId], references: [id])
+
+  serviceType     String  // "electricity" | "plumbing" | "locksmith" | "ac" | "other"
+  description     String
+  urgency         String  @default("urgent") // "urgent" | "today" | "flexible"
+  status          String  @default("searching") // "searching" | "matched" | "onway" | "arrived" | "completed" | "cancelled"
+
+  customerAddress String
+  customerLat     Float?
+  customerLng     Float?
+
+  estimatedPrice  String?
+  finalPrice      Float?
+  estimatedTime   String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  completedAt     DateTime?
+}
