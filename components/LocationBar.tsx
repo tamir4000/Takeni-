@@ -1,18 +1,34 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface LocationBarProps {
   onLocationChange?: (lat: number, lng: number, address: string) => void
 }
 
 export default function LocationBar({ onLocationChange }: LocationBarProps) {
+  const router = useRouter()
   const [address, setAddress] = useState('מאתר מיקום...')
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState(false)
-  const [inputValue, setInputValue] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    // Check localStorage first
+    try {
+      const saved = localStorage.getItem('takeni_address')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        const parts = [parsed.street, parsed.city].filter(Boolean)
+        if (parts.length > 0) {
+          setAddress(parts.join(', '))
+          setLoading(false)
+          onLocationChange?.(0, 0, parts.join(', '))
+          return
+        }
+      }
+    } catch {
+      // ignore parse errors
+    }
+
     if (!navigator.geolocation) {
       setAddress('הזן כתובת ידנית')
       setLoading(false)
@@ -49,20 +65,11 @@ export default function LocationBar({ onLocationChange }: LocationBarProps) {
   }, [])
 
   const handleEditClick = () => {
-    setEditing(true)
-    setInputValue(address)
-    setTimeout(() => inputRef.current?.focus(), 50)
-  }
-
-  const handleInputConfirm = () => {
-    const val = inputValue.trim()
-    if (val) setAddress(val)
-    setEditing(false)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleInputConfirm()
-    if (e.key === 'Escape') setEditing(false)
+    // Parse current address into street / city best-effort
+    const parts = address.split(',').map(s => s.trim())
+    const street = encodeURIComponent(parts[0] || '')
+    const city = encodeURIComponent(parts[1] || '')
+    router.push(`/customer/location?street=${street}&city=${city}`)
   }
 
   return (
@@ -103,54 +110,32 @@ export default function LocationBar({ onLocationChange }: LocationBarProps) {
         )}
       </div>
 
-      {/* Address text or input */}
+      {/* Address text */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        {editing ? (
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
-            onBlur={handleInputConfirm}
-            onKeyDown={handleKeyDown}
-            placeholder="הזן כתובת..."
-            style={{
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              color: '#ffffff',
-              fontSize: 13,
-              width: '100%',
-              fontFamily: 'inherit',
-              direction: 'rtl',
-            }}
-          />
-        ) : (
-          <span
-            style={{
-              color: loading ? '#4d6b85' : '#ffffff',
-              fontSize: 13,
-              fontWeight: loading ? 400 : 500,
-              display: 'block',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {loading ? (
-              <span
-                className="shimmer"
-                style={{ display: 'inline-block', width: 150, height: 13, borderRadius: 4, verticalAlign: 'middle' }}
-              />
-            ) : (
-              address
-            )}
-          </span>
-        )}
+        <span
+          style={{
+            color: loading ? '#4d6b85' : '#ffffff',
+            fontSize: 13,
+            fontWeight: loading ? 400 : 500,
+            display: 'block',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {loading ? (
+            <span
+              className="shimmer"
+              style={{ display: 'inline-block', width: 150, height: 13, borderRadius: 4, verticalAlign: 'middle' }}
+            />
+          ) : (
+            address
+          )}
+        </span>
       </div>
 
       {/* Action button */}
-      {!loading && !editing && (
+      {!loading && (
         <button
           onClick={handleEditClick}
           style={{
@@ -167,24 +152,6 @@ export default function LocationBar({ onLocationChange }: LocationBarProps) {
           }}
         >
           שנה
-        </button>
-      )}
-
-      {editing && (
-        <button
-          onClick={handleInputConfirm}
-          style={{
-            flexShrink: 0,
-            fontSize: 11,
-            color: '#00d4b8',
-            fontWeight: 700,
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '2px 6px',
-          }}
-        >
-          אישור
         </button>
       )}
     </div>

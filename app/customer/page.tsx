@@ -84,8 +84,23 @@ export default function CustomerPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [availableCount] = useState(() => Math.floor(Math.random() * 6) + 3)
+  const [customerAddress, setCustomerAddress] = useState<string | undefined>(undefined)
 
   useEffect(() => {
+    // Load saved address from localStorage
+    try {
+      const saved = localStorage.getItem('takeni_address')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        const parts = [parsed.street, parsed.city].filter(Boolean)
+        if (parts.length > 0) {
+          setCustomerAddress(parts.join(', '))
+        }
+      }
+    } catch {
+      // ignore parse errors
+    }
+
     fetch('/api/auth/me')
       .then(r => r.json())
       .then(d => {
@@ -157,7 +172,7 @@ export default function CustomerPage() {
         </div>
 
         {/* Location bar */}
-        <LocationBar />
+        <LocationBar onLocationChange={(_, __, addr) => setCustomerAddress(addr)} />
 
         {/* Distance estimate */}
         <p style={{ fontSize: 12, color: '#4d6b85', marginBottom: 18, marginTop: -8 }}>
@@ -174,7 +189,7 @@ export default function CustomerPage() {
           {SERVICES.map(service => (
             <button
               key={service.id}
-              onClick={() => router.push(`/customer/problem?service=${service.id}`)}
+              onClick={() => router.push(`/customer/problem?service=${service.id}${customerAddress ? `&customerAddress=${encodeURIComponent(customerAddress)}` : ''}`)}
               className="card-hover fade-in-up"
               style={{
                 background: 'linear-gradient(145deg, #0d1f3c 0%, #0a1a32 100%)',
@@ -213,7 +228,7 @@ export default function CustomerPage() {
 
         {/* "Other" card - full width */}
         <button
-          onClick={() => router.push('/customer/problem?service=other')}
+          onClick={() => router.push(`/customer/problem?service=other${customerAddress ? `&customerAddress=${encodeURIComponent(customerAddress)}` : ''}`)}
           className="card-hover fade-in-up"
           style={{
             width: '100%',
