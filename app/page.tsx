@@ -257,6 +257,21 @@ export default function LandingPage() {
             </span>
           ))}
         </div>
+
+        {/* Admin link */}
+        <a
+          href="/admin"
+          style={{
+            display: 'block',
+            marginTop: 32,
+            fontSize: 11,
+            color: '#2a3f55',
+            textDecoration: 'none',
+            textAlign: 'center',
+          }}
+        >
+          לוח בקרה
+        </a>
       </div>
     </main>
   )
