@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import SplashScreen from '@/components/SplashScreen'
 
 export const metadata: Metadata = {
   title: 'TAKENI - טכנאי עכשיו, מכל סוג',
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="he" dir="rtl">
       <body className="bg-bg-dark text-white antialiased">
         <div className="min-h-screen flex flex-col">
+          <SplashScreen />
           {children}
         </div>
       </body>

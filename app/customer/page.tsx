@@ -189,7 +189,7 @@ export default function CustomerPage() {
           {SERVICES.map(service => (
             <button
               key={service.id}
-              onClick={() => router.push(`/customer/problem?service=${service.id}${customerAddress ? `&customerAddress=${encodeURIComponent(customerAddress)}` : ''}`)}
+              onClick={() => router.push(`/customer/technicians?service=${service.id}${customerAddress ? `&customerAddress=${encodeURIComponent(customerAddress)}` : ''}`)}
               className="card-hover fade-in-up"
               style={{
                 background: 'linear-gradient(145deg, #0d1f3c 0%, #0a1a32 100%)',
@@ -228,7 +228,7 @@ export default function CustomerPage() {
 
         {/* "Other" card - full width */}
         <button
-          onClick={() => router.push(`/customer/problem?service=other${customerAddress ? `&customerAddress=${encodeURIComponent(customerAddress)}` : ''}`)}
+          onClick={() => router.push(`/customer/technicians?service=other${customerAddress ? `&customerAddress=${encodeURIComponent(customerAddress)}` : ''}`)}
           className="card-hover fade-in-up"
           style={{
             width: '100%',
