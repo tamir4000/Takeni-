@@ -2,37 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+html { direction: rtl; }
+
 :root {
-  --bg-dark: #0a1628;
+  --bg-primary: #080f1e;
+  --bg-card: #0d1a2e;
+  --bg-card-hover: #102035;
   --accent: #00d4b8;
+  --accent-2: #0099ff;
+  --gradient-primary: linear-gradient(135deg, #00d4b8 0%, #0088cc 100%);
+  --text-primary: #ffffff;
+  --text-secondary: #8ba3be;
+  --text-muted: #4d6b85;
+  --success: #00c853;
+  --warning: #ffa000;
+  --border: rgba(0, 212, 184, 0.15);
+  --shadow-glow: 0 0 30px rgba(0, 212, 184, 0.15);
 }
 
 * {
   box-sizing: border-box;
 }
 
-html {
-  direction: rtl;
-}
-
 body {
-  background-color: #0a1628;
+  background: #080f1e;
   color: white;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: #0a1628;
-}
-::-webkit-scrollbar-thumb {
-  background: #00d4b8;
-  border-radius: 2px;
 }
 
 /* Remove number input arrows */
@@ -47,12 +44,46 @@ input, textarea, select {
   text-align: right;
 }
 
-/* Glassmorphism card */
+/* Glass card effect */
 .glass-card {
-  background: rgba(13, 31, 60, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 212, 184, 0.15);
+  background: rgba(13, 26, 46, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 212, 184, 0.12);
   border-radius: 16px;
+}
+
+/* Glow button */
+.btn-primary {
+  background: linear-gradient(135deg, #00d4b8 0%, #0088cc 100%);
+  color: #080f1e;
+  font-weight: 700;
+  border-radius: 14px;
+  padding: 14px 24px;
+  width: 100%;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(0, 212, 184, 0.3);
+}
+.btn-primary:active { transform: scale(0.98); }
+
+/* Smooth scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #080f1e; }
+::-webkit-scrollbar-thumb { background: #00d4b8; border-radius: 2px; }
+
+/* Input style */
+.input-field {
+  background: rgba(13, 26, 46, 0.9);
+  border: 1.5px solid rgba(0, 212, 184, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: white;
+  width: 100%;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+.input-field:focus {
+  outline: none;
+  border-color: #00d4b8;
 }
 
 /* Teal glow effect */
@@ -60,12 +91,36 @@ input, textarea, select {
   box-shadow: 0 0 30px rgba(0, 212, 184, 0.3);
 }
 
+/* Pulse dot */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+}
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+.float-anim { animation: float 3s ease-in-out infinite; }
+
+/* Shimmer loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(13,26,46,0) 0%, rgba(0,212,184,0.1) 50%, rgba(13,26,46,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
 /* Spinner animation */
 @keyframes spin-ring {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
-
 .spin-ring {
   animation: spin-ring 1.5s linear infinite;
 }
@@ -75,16 +130,119 @@ input, textarea, select {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
-/* Toggle switch */
+/* Staggered fade-in for cards */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+.fade-in-up:nth-child(1) { animation-delay: 0.05s; }
+.fade-in-up:nth-child(2) { animation-delay: 0.1s; }
+.fade-in-up:nth-child(3) { animation-delay: 0.15s; }
+.fade-in-up:nth-child(4) { animation-delay: 0.2s; }
+.fade-in-up:nth-child(5) { animation-delay: 0.25s; }
+
+/* Toggle track */
 .toggle-track {
   transition: background-color 0.2s ease;
 }
-
 .toggle-thumb {
   transition: transform 0.2s ease;
+}
+
+/* Radar rings animation */
+@keyframes radar-ring {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.radar-ring {
+  animation: radar-ring 2.5s ease-out infinite;
+}
+.radar-ring-2 {
+  animation: radar-ring 2.5s ease-out 0.8s infinite;
+}
+.radar-ring-3 {
+  animation: radar-ring 2.5s ease-out 1.6s infinite;
+}
+
+/* Counter up animation */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.count-up { animation: count-up 0.3s ease-out forwards; }
+
+/* Progress bar fill */
+@keyframes progress-fill {
+  0% { width: 0%; }
+  100% { width: 85%; }
+}
+.progress-fill {
+  animation: progress-fill 18s ease-in-out forwards;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #00d4b8 0%, #0099ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 212, 184, 0.18);
+}
+.card-hover:active {
+  transform: scale(0.97);
+}
+
+/* Urgency pill active state */
+.urgency-pill {
+  transition: all 0.2s ease;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid rgba(0, 212, 184, 0.2);
+  background: rgba(13, 26, 46, 0.8);
+  color: #8ba3be;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+}
+.urgency-pill.active {
+  background: linear-gradient(135deg, #00d4b8 0%, #0088cc 100%);
+  color: #080f1e;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(0, 212, 184, 0.3);
+}
+
+/* Specialty pill */
+.specialty-pill {
+  transition: all 0.18s ease;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid rgba(0, 212, 184, 0.2);
+  background: rgba(13, 26, 46, 0.8);
+  color: #8ba3be;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.specialty-pill.active {
+  background: linear-gradient(135deg, #00d4b8 0%, #0088cc 100%);
+  color: #080f1e;
+  border-color: transparent;
 }

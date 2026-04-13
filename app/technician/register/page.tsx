@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 
-const INPUT_STYLE = {
+const INPUT_STYLE: React.CSSProperties = {
   background: '#0d1f3c',
-  border: '1px solid rgba(0,212,184,0.2)',
+  border: '1.5px solid rgba(0,212,184,0.2)',
   borderRadius: 12,
   color: '#ffffff',
   padding: '14px 16px',
@@ -14,15 +14,15 @@ const INPUT_STYLE = {
   width: '100%',
   outline: 'none',
   transition: 'border-color 0.2s',
+  fontFamily: 'inherit',
 }
 
 const SPECIALTY_OPTIONS = [
-  { value: '', label: 'בחר התמחות' },
-  { value: 'electricity', label: 'חשמל' },
-  { value: 'plumbing', label: 'אינסטלציה' },
-  { value: 'locksmith', label: 'מנעול' },
-  { value: 'ac', label: 'מזגן' },
-  { value: 'other', label: 'אחר' },
+  { value: 'electricity', label: 'חשמל', icon: '⚡' },
+  { value: 'plumbing', label: 'אינסטלציה', icon: '🔧' },
+  { value: 'locksmith', label: 'מנעול', icon: '🔑' },
+  { value: 'ac', label: 'מזגן', icon: '❄️' },
+  { value: 'other', label: 'אחר', icon: '🛠️' },
 ]
 
 interface FormData {
@@ -30,7 +30,7 @@ interface FormData {
   phone: string
   email: string
   specialty: string
-  yearsExperience: string
+  yearsExperience: number
   password: string
 }
 
@@ -45,13 +45,14 @@ export default function TechnicianRegisterPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const [form, setForm] = useState<FormData>({
     name: '',
     phone: '',
     email: '',
     specialty: '',
-    yearsExperience: '',
+    yearsExperience: 1,
     password: '',
   })
 
@@ -61,7 +62,7 @@ export default function TechnicianRegisterPage() {
     license: null,
   })
 
-  const updateField = (field: keyof FormData, value: string) => {
+  const updateField = (field: keyof FormData, value: string | number) => {
     setForm(prev => ({ ...prev, [field]: value }))
     setError('')
   }
@@ -70,6 +71,7 @@ export default function TechnicianRegisterPage() {
     if (!form.name.trim()) { setError('שם מלא הוא שדה חובה'); return }
     if (!form.phone.trim()) { setError('מספר נייד הוא שדה חובה'); return }
     if (!form.specialty) { setError('אנא בחר התמחות'); return }
+    if (!form.password || form.password.length < 6) { setError('סיסמה חייבת להכיל לפחות 6 תווים'); return }
     setError('')
     setStep(2)
   }
@@ -79,7 +81,6 @@ export default function TechnicianRegisterPage() {
     setError('')
     try {
       const fullPhone = `+972${form.phone.replace(/^0/, '')}`
-      const password = form.password || `takeni_${Date.now()}`
 
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -88,10 +89,10 @@ export default function TechnicianRegisterPage() {
           name: form.name,
           phone: fullPhone,
           email: form.email || undefined,
-          password,
+          password: form.password,
           role: 'technician',
           specialty: form.specialty,
-          yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience, 10) : 0,
+          yearsExperience: form.yearsExperience,
         }),
       })
 
@@ -125,36 +126,72 @@ export default function TechnicianRegisterPage() {
     <main
       className="flex flex-col min-h-screen"
       dir="rtl"
-      style={{ background: '#0a1628', maxWidth: 430, margin: '0 auto' }}
+      style={{ background: '#080f1e', maxWidth: 430, margin: '0 auto' }}
     >
       <Header />
 
-      <div className="flex-1 px-5 pb-12">
+      <div style={{ flex: 1, padding: '16px 20px 48px' }}>
+
+        {/* Step indicator — always visible */}
+        <div style={{ marginBottom: 24 }}>
+          {/* Step dots */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 8 }}>
+            {[1, 2, 3].map((s, i) => (
+              <div key={s} style={{ display: 'flex', alignItems: 'center', flex: i < 2 ? 1 : undefined }}>
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: s < step
+                    ? 'linear-gradient(135deg, #00d4b8 0%, #0088cc 100%)'
+                    : s === step
+                      ? 'rgba(0,212,184,0.2)'
+                      : 'rgba(13,26,46,0.8)',
+                  border: s <= step
+                    ? '2px solid #00d4b8'
+                    : '2px solid rgba(0,212,184,0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'all 0.3s',
+                }}>
+                  {s < step ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 6L9 17l-5-5" stroke="#080f1e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: s === step ? '#00d4b8' : '#4d6b85' }}>{s}</span>
+                  )}
+                </div>
+                {i < 2 && (
+                  <div style={{
+                    flex: 1,
+                    height: 2,
+                    background: s < step ? '#00d4b8' : 'rgba(0,212,184,0.12)',
+                    transition: 'background 0.3s',
+                    margin: '0 4px',
+                  }} />
+                )}
+              </div>
+            ))}
+          </div>
+          <p style={{ color: '#4d6b85', fontSize: 11, fontWeight: 600 }}>שלב {step} מתוך 3</p>
+        </div>
+
         {/* Step 1 - Basic Info */}
         {step === 1 && (
-          <div className="flex flex-col gap-5">
-            <div className="mb-2">
-              <h1 className="text-white font-black text-2xl mb-2">הרשמה לטכנאים</h1>
-              <p className="text-[#7a9dbf] text-sm leading-relaxed">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div>
+              <h1 style={{ color: '#fff', fontWeight: 900, fontSize: 24, marginBottom: 6 }}>הרשמה לטכנאים</h1>
+              <p style={{ color: '#8ba3be', fontSize: 13, lineHeight: 1.6 }}>
                 מלא את הפרטים שלך כדי להצטרף לרשת הטכנאים שלנו
               </p>
             </div>
 
-            {/* Step indicator */}
-            <div className="flex items-center gap-2 mb-1">
-              {[1, 2, 3].map(s => (
-                <div
-                  key={s}
-                  className="h-1.5 flex-1 rounded-full transition-all duration-300"
-                  style={{ background: s <= step ? '#00d4b8' : 'rgba(0,212,184,0.15)' }}
-                />
-              ))}
-            </div>
-            <p className="text-[#7a9dbf] text-xs -mt-3">שלב 1 מתוך 3</p>
-
             {/* Name */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[#7a9dbf] text-sm font-medium">שם מלא</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ color: '#8ba3be', fontSize: 13, fontWeight: 600 }}>שם מלא</label>
               <input
                 type="text"
                 placeholder="יוסי כהן"
@@ -166,23 +203,26 @@ export default function TechnicianRegisterPage() {
               />
             </div>
 
-            {/* Phone */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[#7a9dbf] text-sm font-medium">מספר נייד</label>
-              <div className="flex items-center gap-2">
-                <span
-                  className="flex-shrink-0 px-3 py-3.5 rounded-xl font-bold text-sm"
-                  style={{
-                    background: 'rgba(0,212,184,0.12)',
-                    border: '1px solid rgba(0,212,184,0.3)',
-                    color: '#00d4b8',
-                  }}
-                >
-                  +972
-                </span>
+            {/* Phone with Israeli flag */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ color: '#8ba3be', fontSize: 13, fontWeight: 600 }}>מספר נייד</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '14px 12px',
+                  borderRadius: 12,
+                  background: 'rgba(0,212,184,0.08)',
+                  border: '1.5px solid rgba(0,212,184,0.25)',
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>🇮🇱</span>
+                  <span style={{ color: '#00d4b8', fontSize: 14, fontWeight: 700 }}>+972</span>
+                </div>
                 <input
                   type="tel"
-                  placeholder="הקלד/י מספר ללא אפסים"
+                  placeholder="50-123-4567"
                   value={form.phone}
                   onChange={e => updateField('phone', e.target.value)}
                   style={{ ...INPUT_STYLE, flex: 1 }}
@@ -193,8 +233,10 @@ export default function TechnicianRegisterPage() {
             </div>
 
             {/* Email */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[#7a9dbf] text-sm font-medium">אימייל</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ color: '#8ba3be', fontSize: 13, fontWeight: 600 }}>
+                אימייל <span style={{ color: '#4d6b85', fontWeight: 400 }}>(אופציונלי)</span>
+              </label>
               <input
                 type="email"
                 placeholder="example@email.com"
@@ -206,95 +248,189 @@ export default function TechnicianRegisterPage() {
               />
             </div>
 
-            {/* Specialty */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[#7a9dbf] text-sm font-medium">התמחות</label>
-              <select
-                value={form.specialty}
-                onChange={e => updateField('specialty', e.target.value)}
-                style={{ ...INPUT_STYLE, cursor: 'pointer' }}
-                onFocus={e => (e.currentTarget.style.borderColor = '#00d4b8')}
-                onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,212,184,0.2)')}
-              >
+            {/* Specialty pills */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <label style={{ color: '#8ba3be', fontSize: 13, fontWeight: 600 }}>התמחות</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {SPECIALTY_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value} style={{ background: '#0d1f3c' }}>
+                  <button
+                    key={opt.value}
+                    onClick={() => updateField('specialty', opt.value)}
+                    className={`specialty-pill${form.specialty === opt.value ? ' active' : ''}`}
+                  >
+                    <span style={{ marginLeft: 4 }}>{opt.icon}</span>
                     {opt.label}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
 
-            {/* Years Experience */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[#7a9dbf] text-sm font-medium">שנות ניסיון</label>
-              <input
-                type="number"
-                placeholder="5"
-                min="0"
-                max="60"
-                value={form.yearsExperience}
-                onChange={e => updateField('yearsExperience', e.target.value)}
-                style={INPUT_STYLE}
-                onFocus={e => (e.currentTarget.style.borderColor = '#00d4b8')}
-                onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,212,184,0.2)')}
-              />
+            {/* Years Experience counter */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <label style={{ color: '#8ba3be', fontSize: 13, fontWeight: 600 }}>שנות ניסיון</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                <button
+                  onClick={() => updateField('yearsExperience', Math.max(0, form.yearsExperience - 1))}
+                  style={{
+                    width: 44,
+                    height: 48,
+                    borderRadius: '12px 0 0 12px',
+                    background: 'rgba(0,212,184,0.1)',
+                    border: '1.5px solid rgba(0,212,184,0.25)',
+                    borderRight: 'none',
+                    color: '#00d4b8',
+                    fontSize: 22,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  −
+                </button>
+                <div style={{
+                  flex: 1,
+                  height: 48,
+                  background: '#0d1f3c',
+                  border: '1.5px solid rgba(0,212,184,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  fontSize: 18,
+                  fontWeight: 700,
+                }}>
+                  {form.yearsExperience}
+                </div>
+                <button
+                  onClick={() => updateField('yearsExperience', Math.min(60, form.yearsExperience + 1))}
+                  style={{
+                    width: 44,
+                    height: 48,
+                    borderRadius: '0 12px 12px 0',
+                    background: 'rgba(0,212,184,0.1)',
+                    border: '1.5px solid rgba(0,212,184,0.25)',
+                    borderLeft: 'none',
+                    color: '#00d4b8',
+                    fontSize: 22,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  +
+                </button>
+              </div>
             </div>
 
             {/* Password */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[#7a9dbf] text-sm font-medium">סיסמה</label>
-              <input
-                type="password"
-                placeholder="לפחות 6 תווים"
-                value={form.password}
-                onChange={e => updateField('password', e.target.value)}
-                style={INPUT_STYLE}
-                onFocus={e => (e.currentTarget.style.borderColor = '#00d4b8')}
-                onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,212,184,0.2)')}
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ color: '#8ba3be', fontSize: 13, fontWeight: 600 }}>סיסמה</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="לפחות 6 תווים"
+                  value={form.password}
+                  onChange={e => updateField('password', e.target.value)}
+                  style={{ ...INPUT_STYLE, paddingLeft: 44 }}
+                  onFocus={e => (e.currentTarget.style.borderColor = '#00d4b8')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,212,184,0.2)')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  style={{
+                    position: 'absolute',
+                    left: 14,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {showPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4d6b85" strokeWidth="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" strokeLinecap="round" />
+                      <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4d6b85" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (
-              <p className="text-red-400 text-sm text-center">{error}</p>
+              <div style={{
+                padding: '10px 14px', borderRadius: 10,
+                background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.3)',
+                color: '#ff6b6b', fontSize: 13, textAlign: 'center',
+              }}>
+                {error}
+              </div>
             )}
 
             <button
               onClick={handleSubmitStep1}
-              className="w-full py-4 rounded-2xl font-bold text-base text-[#0a1628] transition-all active:scale-95 mt-2"
-              style={{ background: 'linear-gradient(135deg, #00d4b8 0%, #009e8a 100%)' }}
+              style={{
+                width: '100%',
+                padding: '15px 24px',
+                borderRadius: 14,
+                fontWeight: 700,
+                fontSize: 15,
+                color: '#080f1e',
+                background: 'linear-gradient(135deg, #00d4b8 0%, #0088cc 100%)',
+                boxShadow: '0 6px 24px rgba(0,212,184,0.35)',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
             >
               המשך להעלאת מסמכים
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
         )}
 
         {/* Step 2 - Document Upload */}
         {step === 2 && (
-          <div className="flex flex-col gap-5">
-            <div className="mb-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div>
               <button
                 onClick={() => setStep(1)}
-                className="text-[#7a9dbf] text-sm mb-4 flex items-center gap-1 hover:text-white transition-colors"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  color: '#8ba3be', fontSize: 13, background: 'none',
+                  border: 'none', cursor: 'pointer', padding: 0, marginBottom: 12,
+                }}
               >
-                ← חזרה
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M19 12H5M12 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                חזרה
               </button>
-              <h1 className="text-white font-black text-2xl mb-2">העלאת מסמכים</h1>
-              <p className="text-[#7a9dbf] text-sm leading-relaxed">
+              <h1 style={{ color: '#fff', fontWeight: 900, fontSize: 24, marginBottom: 6 }}>העלאת מסמכים</h1>
+              <p style={{ color: '#8ba3be', fontSize: 13, lineHeight: 1.6 }}>
                 נדרשים מסמכים לאימות זהות ורישיונות מקצועיים
               </p>
             </div>
-
-            {/* Step indicator */}
-            <div className="flex items-center gap-2 mb-1">
-              {[1, 2, 3].map(s => (
-                <div
-                  key={s}
-                  className="h-1.5 flex-1 rounded-full transition-all duration-300"
-                  style={{ background: s <= step ? '#00d4b8' : 'rgba(0,212,184,0.15)' }}
-                />
-              ))}
-            </div>
-            <p className="text-[#7a9dbf] text-xs -mt-3">שלב 2 מתוך 3</p>
 
             {/* Profile photo */}
             <UploadBox
@@ -302,7 +438,7 @@ export default function TechnicianRegisterPage() {
               accept="image/*"
               hint="JPG, PNG עד 5MB"
               icon={
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,184,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,184,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="8" r="4" />
                   <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
                 </svg>
@@ -318,7 +454,7 @@ export default function TechnicianRegisterPage() {
               accept=".pdf,image/*"
               hint="PDF, JPG, PNG עד 5MB"
               icon={
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,184,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,184,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                   <path d="M8 9h8M8 13h5" />
                 </svg>
@@ -334,7 +470,7 @@ export default function TechnicianRegisterPage() {
               accept=".pdf,image/*"
               hint="PDF, JPG, PNG עד 5MB"
               icon={
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,184,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,184,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                   <path d="M8 9h8M8 13h8M8 17h5" />
                   <circle cx="17" cy="17" r="3" />
@@ -347,87 +483,126 @@ export default function TechnicianRegisterPage() {
             />
 
             {error && (
-              <p className="text-red-400 text-sm text-center">{error}</p>
+              <div style={{
+                padding: '10px 14px', borderRadius: 10,
+                background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.3)',
+                color: '#ff6b6b', fontSize: 13, textAlign: 'center',
+              }}>
+                {error}
+              </div>
             )}
 
             <button
               onClick={handleSubmitStep2}
               disabled={loading}
-              className="w-full py-4 rounded-2xl font-bold text-base text-[#0a1628] transition-all active:scale-95 mt-2 disabled:opacity-60"
-              style={{ background: 'linear-gradient(135deg, #00d4b8 0%, #009e8a 100%)' }}
+              style={{
+                width: '100%',
+                padding: '15px 24px',
+                borderRadius: 14,
+                fontWeight: 700,
+                fontSize: 15,
+                color: '#080f1e',
+                background: loading ? 'rgba(0,212,184,0.4)' : 'linear-gradient(135deg, #00d4b8 0%, #0088cc 100%)',
+                boxShadow: loading ? 'none' : '0 6px 24px rgba(0,212,184,0.35)',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
             >
-              {loading ? 'שולח...' : 'שלח בקשה'}
+              {loading ? (
+                <>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    style={{ animation: 'spin-ring 1s linear infinite' }}>
+                    <circle cx="12" cy="12" r="9" strokeDasharray="40 20" />
+                  </svg>
+                  שולח...
+                </>
+              ) : 'שלח בקשה'}
             </button>
           </div>
         )}
 
         {/* Step 3 - Success */}
         {step === 3 && (
-          <div className="flex flex-col items-center justify-center gap-6 pt-8 text-center">
-            {/* Step indicator */}
-            <div className="flex items-center gap-2 w-full mb-1">
-              {[1, 2, 3].map(s => (
-                <div
-                  key={s}
-                  className="h-1.5 flex-1 rounded-full"
-                  style={{ background: '#00d4b8' }}
-                />
-              ))}
-            </div>
-
-            {/* Spinning teal circle */}
-            <div className="relative flex items-center justify-center" style={{ width: 100, height: 100 }}>
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  border: '3px solid rgba(0,212,184,0.15)',
-                }}
-              />
-              <div
-                className="absolute inset-0 rounded-full animate-spin"
-                style={{
-                  border: '3px solid transparent',
-                  borderTopColor: '#00d4b8',
-                  borderRightColor: 'rgba(0,212,184,0.4)',
-                }}
-              />
-              <span style={{ fontSize: 36 }}>✅</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', paddingTop: 16, gap: 20 }}>
+            {/* Success animation */}
+            <div style={{ position: 'relative', width: 100, height: 100 }}>
+              <div style={{
+                position: 'absolute', inset: 0, borderRadius: '50%',
+                border: '3px solid rgba(0,212,184,0.15)',
+              }} />
+              <div style={{
+                position: 'absolute', inset: 0, borderRadius: '50%',
+                border: '3px solid transparent',
+                borderTopColor: '#00d4b8',
+                borderRightColor: 'rgba(0,212,184,0.4)',
+                animation: 'spin-ring 2s linear infinite',
+              }} />
+              <div style={{
+                position: 'absolute', inset: 0, display: 'flex',
+                alignItems: 'center', justifyContent: 'center', fontSize: 38,
+              }}>
+                ✅
+              </div>
             </div>
 
             <div>
-              <h1 className="text-white font-black text-2xl mb-3">בקשתך נשלחה!</h1>
-              <p className="text-[#7a9dbf] text-sm leading-relaxed max-w-[320px]">
+              <h1 style={{ color: '#fff', fontWeight: 900, fontSize: 26, marginBottom: 10 }}>בקשתך נשלחה!</h1>
+              <p style={{ color: '#8ba3be', fontSize: 14, lineHeight: 1.6, maxWidth: 300 }}>
                 המסמכים שלך נמצאים בבדיקה. נעדכן אותך ב-SMS ובאימייל ברגע שהחשבון יאושר.
               </p>
             </div>
 
-            {/* Estimated time chip */}
-            <span
-              className="px-4 py-2 rounded-full font-bold text-sm"
-              style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}
-            >
+            <span style={{
+              padding: '8px 20px',
+              borderRadius: 20,
+              fontWeight: 700,
+              fontSize: 13,
+              background: 'rgba(245,158,11,0.12)',
+              color: '#f59e0b',
+              border: '1px solid rgba(245,158,11,0.3)',
+            }}>
               זמן אישור משוער: 24-48 שעות ⏳
             </span>
 
-            <div className="w-full flex flex-col gap-3 mt-2">
-              {/* Orange demo button */}
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
               <button
                 onClick={handleApproveDemo}
                 disabled={loading}
-                className="w-full py-4 rounded-2xl font-bold text-base text-white transition-all active:scale-95 disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg, #ff9500, #ff6b00)' }}
+                style={{
+                  width: '100%',
+                  padding: '15px 24px',
+                  borderRadius: 14,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  color: '#fff',
+                  background: 'linear-gradient(135deg, #ff9500, #ff6b00)',
+                  boxShadow: '0 6px 20px rgba(255,149,0,0.3)',
+                  border: 'none',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.6 : 1,
+                }}
               >
                 {loading ? 'טוען...' : 'דלג על אישור (דמו) 🚀'}
               </button>
 
-              {/* Back to home */}
               <a
                 href="/"
-                className="w-full py-4 rounded-2xl font-bold text-base text-center transition-all active:scale-95"
                 style={{
-                  background: 'transparent',
-                  border: '1.5px solid rgba(0,212,184,0.4)',
+                  width: '100%',
+                  padding: '14px 24px',
+                  borderRadius: 14,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  textAlign: 'center',
                   color: '#00d4b8',
+                  background: 'rgba(0,212,184,0.06)',
+                  border: '1.5px solid rgba(0,212,184,0.3)',
+                  textDecoration: 'none',
+                  display: 'block',
                 }}
               >
                 חזרה למסך הראשי
@@ -454,25 +629,33 @@ interface UploadBoxProps {
 function UploadBox({ label, accept, hint, icon, file, onFile, btnLabel }: UploadBoxProps) {
   const inputId = `upload-${label}`
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[#7a9dbf] text-sm font-medium">{label}</label>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <label style={{ color: '#8ba3be', fontSize: 13, fontWeight: 600 }}>{label}</label>
       <label
         htmlFor={inputId}
-        className="flex flex-col items-center justify-center gap-2 py-6 rounded-2xl cursor-pointer transition-all"
         style={{
-          border: '1.5px dashed rgba(0,212,184,0.4)',
-          background: 'rgba(0,212,184,0.05)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          padding: '20px 16px',
+          borderRadius: 14,
+          cursor: 'pointer',
+          border: file ? '1.5px solid rgba(0,200,83,0.4)' : '1.5px dashed rgba(0,212,184,0.35)',
+          background: file ? 'rgba(0,200,83,0.05)' : 'rgba(0,212,184,0.04)',
+          transition: 'all 0.2s',
         }}
       >
         {icon}
         {file ? (
-          <span className="text-green-400 text-sm font-medium text-center px-4 break-all">
-            {file.name}
+          <span style={{ color: '#00c853', fontSize: 13, fontWeight: 600, textAlign: 'center', padding: '0 16px', wordBreak: 'break-all' }}>
+            ✓ {file.name}
           </span>
         ) : (
           <>
-            <span className="text-[#00d4b8] text-sm font-medium">{btnLabel}</span>
-            <span className="text-[#7a9dbf] text-xs">{hint}</span>
+            <span style={{ color: '#00d4b8', fontSize: 13, fontWeight: 600 }}>{btnLabel}</span>
+            <span style={{ color: '#4d6b85', fontSize: 11 }}>{hint}</span>
           </>
         )}
         <input

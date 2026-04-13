@@ -9,7 +9,7 @@ function SearchContent() {
   const searchParams = useSearchParams()
   const jobId = searchParams.get('jobId')
 
-  const [dots, setDots] = useState('.')
+  const [techCount, setTechCount] = useState(12)
   const [elapsed, setElapsed] = useState(0)
 
   const checkStatus = useCallback(async () => {
@@ -32,10 +32,13 @@ function SearchContent() {
       return
     }
 
-    // Animated dots
-    const dotsInterval = setInterval(() => {
-      setDots(d => (d.length >= 3 ? '.' : d + '.'))
-    }, 500)
+    // Increment tech counter for visual effect
+    const countInterval = setInterval(() => {
+      setTechCount(c => {
+        if (c >= 47) return 47
+        return c + Math.floor(Math.random() * 4) + 1
+      })
+    }, 400)
 
     // Elapsed time counter
     const elapsedInterval = setInterval(() => {
@@ -44,10 +47,10 @@ function SearchContent() {
 
     // Poll for status
     const pollInterval = setInterval(checkStatus, 3000)
-    checkStatus() // immediate check
+    checkStatus()
 
     return () => {
-      clearInterval(dotsInterval)
+      clearInterval(countInterval)
       clearInterval(elapsedInterval)
       clearInterval(pollInterval)
     }
@@ -64,87 +67,204 @@ function SearchContent() {
   }
 
   return (
-    <main className="flex flex-col min-h-screen bg-bg-dark" style={{ maxWidth: 430, margin: '0 auto' }}>
+    <main className="flex flex-col min-h-screen" style={{ background: '#080f1e', maxWidth: 430, margin: '0 auto' }}>
       <Header />
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-16">
-        {/* Spinner */}
-        <div className="relative mb-10">
-          {/* Outer ping ring */}
-          <div
-            className="absolute inset-0 rounded-full animate-ping"
-            style={{
-              width: 120,
-              height: 120,
-              border: '2px solid rgba(0,212,184,0.3)',
-              animationDuration: '2s',
-            }}
-          />
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 24px 80px',
+      }}>
+
+        {/* Radar animation */}
+        <div style={{ position: 'relative', width: 200, height: 200, marginBottom: 36 }}>
+          {/* Expanding radar rings */}
+          {[0, 1, 2].map(i => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '50%',
+                border: '2px solid rgba(0,212,184,0.4)',
+                animation: `radar-ring 2.5s ease-out ${i * 0.8}s infinite`,
+              }}
+            />
+          ))}
+
+          {/* Static outer ring */}
+          <div style={{
+            position: 'absolute',
+            inset: 16,
+            borderRadius: '50%',
+            border: '1px solid rgba(0,212,184,0.1)',
+          }} />
+          <div style={{
+            position: 'absolute',
+            inset: 36,
+            borderRadius: '50%',
+            border: '1px solid rgba(0,212,184,0.08)',
+          }} />
+
           {/* Spinning arc */}
           <svg
-            width="120"
-            height="120"
-            viewBox="0 0 120 120"
-            className="animate-spin"
-            style={{ animationDuration: '1.5s' }}
+            width="200"
+            height="200"
+            viewBox="0 0 200 200"
+            style={{ position: 'absolute', inset: 0, animation: 'spin-ring 2s linear infinite' }}
           >
             <circle
-              cx="60"
-              cy="60"
-              r="50"
+              cx="100"
+              cy="100"
+              r="82"
               fill="none"
-              stroke="rgba(0,212,184,0.15)"
-              strokeWidth="4"
+              stroke="rgba(0,212,184,0.12)"
+              strokeWidth="3"
             />
             <circle
-              cx="60"
-              cy="60"
-              r="50"
+              cx="100"
+              cy="100"
+              r="82"
               fill="none"
               stroke="#00d4b8"
-              strokeWidth="4"
-              strokeDasharray="80 234"
+              strokeWidth="3"
+              strokeDasharray="60 452"
               strokeLinecap="round"
             />
           </svg>
-          {/* Center icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00d4b8" strokeWidth="1.5">
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
-            </svg>
+
+          {/* Center circle */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <div style={{
+              width: 72,
+              height: 72,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(0,212,184,0.2) 0%, rgba(0,212,184,0.05) 100%)',
+              border: '2px solid rgba(0,212,184,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#00d4b8" strokeWidth="1.5">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+              </svg>
+            </div>
           </div>
+
+          {/* Small tech dots around radar */}
+          {[0, 60, 120, 180, 240, 300].map((deg, i) => {
+            const rad = (deg * Math.PI) / 180
+            const x = 100 + 78 * Math.cos(rad)
+            const y = 100 + 78 * Math.sin(rad)
+            return (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: x - 4,
+                  top: y - 4,
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: i % 2 === 0 ? '#00d4b8' : '#0099ff',
+                  opacity: 0.7,
+                  animation: `pulse-dot ${1.5 + i * 0.3}s ease-in-out ${i * 0.2}s infinite`,
+                }}
+              />
+            )
+          })}
         </div>
 
-        {/* Text */}
-        <h1 className="text-2xl font-black text-white mb-3 text-center">
-          מחפש טכנאי זמין{dots}
-        </h1>
+        {/* Counter */}
+        <div style={{ textAlign: 'center', marginBottom: 8 }}>
+          <h1 style={{ fontSize: 26, fontWeight: 900, color: '#fff', margin: 0, marginBottom: 6 }}>
+            בודק{' '}
+            <span className="gradient-text" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {techCount}
+            </span>
+            {' '}טכנאים...
+          </h1>
+          <p style={{ color: '#8ba3be', fontSize: 14, margin: 0 }}>
+            סורקים את כל הטכנאים באזור שלך
+          </p>
+        </div>
 
-        <p className="text-text-muted text-sm text-center mb-6">
-          סורקים את כל הטכנאים באזור שלך
-        </p>
+        {/* Progress bar */}
+        <div style={{
+          width: '100%',
+          maxWidth: 300,
+          height: 4,
+          borderRadius: 2,
+          background: 'rgba(0,212,184,0.1)',
+          marginTop: 20,
+          marginBottom: 20,
+          overflow: 'hidden',
+        }}>
+          <div
+            className="progress-fill"
+            style={{
+              height: '100%',
+              borderRadius: 2,
+              background: 'linear-gradient(90deg, #00d4b8 0%, #0099ff 100%)',
+              width: 0,
+            }}
+          />
+        </div>
 
         {/* Location chip */}
         <div
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-10"
-          style={{ background: 'rgba(0,212,184,0.1)', border: '1px solid rgba(0,212,184,0.25)', color: '#00d4b8' }}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 16px',
+            borderRadius: 20,
+            background: 'rgba(0,212,184,0.08)',
+            border: '1px solid rgba(0,212,184,0.2)',
+            marginBottom: 12,
+          }}
         >
-          <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-          מחפש באזור דיזנגוף, תל אביב
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d4b8" strokeWidth="2" strokeLinecap="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <span style={{ color: '#00d4b8', fontSize: 13, fontWeight: 600 }}>
+            מחפש באזור שלך
+          </span>
+          <div className="pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#00d4b8', flexShrink: 0 }} />
         </div>
 
         {/* Timer */}
         {elapsed > 0 && (
-          <p className="text-text-muted text-xs mb-8">
+          <p style={{ color: '#4d6b85', fontSize: 12, marginBottom: 20 }}>
             מחפש כבר {elapsed} שניות...
           </p>
         )}
 
-        {/* Cancel */}
+        {/* Cancel button */}
         <button
           onClick={handleCancel}
-          className="text-text-muted text-sm underline hover:text-white transition-colors"
+          style={{
+            background: 'rgba(13,26,46,0.8)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 12,
+            padding: '10px 24px',
+            color: '#8ba3be',
+            fontSize: 14,
+            cursor: 'pointer',
+            transition: 'color 0.2s, border-color 0.2s',
+            marginTop: 8,
+          }}
         >
           בטל חיפוש
         </button>
@@ -156,8 +276,13 @@ function SearchContent() {
 export default function SearchPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a1628' }}>
-        <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#00d4b8', borderTopColor: 'transparent' }} />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#080f1e' }}>
+        <div style={{
+          width: 36, height: 36, borderRadius: '50%',
+          border: '3px solid rgba(0,212,184,0.2)',
+          borderTopColor: '#00d4b8',
+          animation: 'spin-ring 1s linear infinite',
+        }} />
       </div>
     }>
       <SearchContent />
